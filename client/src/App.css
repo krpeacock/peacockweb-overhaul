@@ -65,6 +65,7 @@ section#switches-list {
   border-radius: 5px 50px 50px 5px;
   transform: translate(100%, 0);
   color: #f44336;
+  left: -4px;
 }
 
 .switch--moving {
