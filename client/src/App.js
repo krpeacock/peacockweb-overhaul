@@ -20,7 +20,12 @@ class App extends Component {
     fetch(postRequest, (response)=>{
       return response.blob();
     }).then((responseBlob)=>{
-      responseBlob.json().then(response=>{alert(JSON.stringify(response))})
+      responseBlob.json().then(response=>{
+        let switchData = this.state.switches;
+        switchData[switchData.indexOf(target)] = response
+        this.setState({switches: switchData})
+      })
+      .catch(err=>{console.error(err)})
     })
   }
   

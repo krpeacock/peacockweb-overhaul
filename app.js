@@ -26,11 +26,18 @@ var fetchSwitches = new Promise((resolve,reject) =>{
 function updateSwitch(targetSwitch, state){
   return new Promise((resolve, reject)=>{
       MongoClient.connect(uri, function(err, db) {
+        console.log(state)
         var switchCollection = db.collection('Switches');
         switchCollection.updateOne({_id: targetSwitch._id}, {$set:{
           state: state
         }}).then(value=>{
           switchCollection.findOne({_id: targetSwitch._id}).then((result)=>{
+            switchData.forEach((value, index)=>{
+              if (value._id === targetSwitch._id){
+                value.state = result.state;
+              }
+            })
+            console.log ("result", result)
             resolve(result)
           })
         })
@@ -52,10 +59,16 @@ app.get('/api/switches', (req, res)=>{
 
 app.post('/api/switches/:id', (req,res)=>{
   var id = req.params.id;
+  var command = req.params.command;
+
   let targetSwitch = switchData.filter(value=>{
     return value.switch_num === id;
   })[0]
-  updateSwitch(targetSwitch, "off").then((value)=>{
+  if (!command) {
+    command = targetSwitch.state === "on" ? "off" : "on"
+  }
+
+  updateSwitch(targetSwitch, command).then((value)=>{
     res.json(value)
   }).catch(err=>{console.error(err)})
 })
