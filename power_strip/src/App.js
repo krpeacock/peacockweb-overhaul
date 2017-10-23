@@ -13,6 +13,9 @@ class App extends Component {
         switchBlob.json().then((switches)=>{
           this.setState({switches})
         })
+    }).catch(err=>{
+      console.log('error: ', err)
+      this.setState({offline: true});
     })
   }
   toggleSwitch(target){
@@ -41,12 +44,14 @@ class App extends Component {
         </div>
       )
     })
+    let offlineWarning = <p>You are currently offline</p>
     return (
       <div className="App">
         <h1 id="app-title">Power Strip</h1>
         <section id="switches-list">
           {switchesList}
         </section>
+        {this.state.offline ? offlineWarning : null}
       </div>
     );
   }

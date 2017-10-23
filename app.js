@@ -48,7 +48,7 @@ function updateSwitch(targetSwitch, state){
   })
 }
 
-app.use(express.static(__dirname + '/client'));
+app.use(express.static(__dirname + '/power_strip/build'));
 
 app.get('/api/switches', (req, res)=>{
   if (switchData){
