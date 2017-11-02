@@ -39,19 +39,42 @@ function updateSwitch(targetSwitch, state){
               if (value._id === targetSwitch._id){
                 value.state = result.state;
               }
-              if (value.name === "Becky's Lamp" && value.state === "off"){
-                fetch(`https://maker.ifttt.com/trigger/becky_lamp_off/with/key/${process.env.IFTTT_KEY}`,
+              if (value.group === "ifttt"){
+                fetch(`https://maker.ifttt.com/trigger/${value.trigger}_${value.state}/with/key/${process.env.IFTTT_KEY}`,
                 {method: "POST", body: JSON.stringify({})})
                 .then(res=>{
-
+                  if (res.status === 200) {
+                    console.log("successfully triggered IFTTT");
+                    console.log(result);
+                    resolve(result)
+                  }
+                  else reject(res);
                 })
                 .catch(err=>{
-                  console.error(err);
+                  reject(err);
                 })
               }
+              else if (value.group === strip){
+                fetch(`http://10.0.1.4/api/switches/${value.switch_num}?password=${process.env.PASSWORD}&command=${value.state}`, {
+                  method: "POST"
+                })
+                .then(res=>{
+                  if (res.status === 200) {
+                    console.log("successfully triggered IFTTT");
+                    console.log(result);
+                    resolve(result)
+                  }
+                  else reject(res);
+                })
+                .catch(err=>{
+                  reject(err);
+                })
+              }
+              else {
+                console.log(result);
+                resolve (result)
+              }
             })
-            console.log ("result", result)
-            resolve(result)
           })
         })
         .catch(err =>{
