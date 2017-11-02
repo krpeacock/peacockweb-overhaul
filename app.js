@@ -5,6 +5,7 @@ const app = express();
 const MongoClient = require('mongodb').MongoClient;
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
+const fetch = require('node-fetch');
 
 var uri = process.env.DB_URI
 
@@ -37,6 +38,16 @@ function updateSwitch(targetSwitch, state){
             switchData.forEach((value, index)=>{
               if (value._id === targetSwitch._id){
                 value.state = result.state;
+              }
+              if (value.name === "Becky's Lamp" && value.state === "off"){
+                fetch(`https://maker.ifttt.com/trigger/becky_lamp_off/with/key/${process.env.IFTTT_KEY}`,
+                {method: "POST", body: JSON.stringify({})})
+                .then(res=>{
+
+                })
+                .catch(err=>{
+                  console.error(err);
+                })
               }
             })
             console.log ("result", result)
