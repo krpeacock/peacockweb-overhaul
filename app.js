@@ -3,6 +3,8 @@ require('dotenv').config()
 const express = require('express');
 const app = express();
 const MongoClient = require('mongodb').MongoClient;
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
 
 var uri = process.env.DB_URI
 
@@ -48,6 +50,11 @@ function updateSwitch(targetSwitch, state){
   })
 }
 
+function emitSwitchChange(switchState){
+  io.emit('switch update', switchState)
+}
+
+
 app.use(express.static(__dirname + '/power_strip/build'));
 
 app.get('/api/switches', (req, res)=>{
@@ -69,14 +76,15 @@ app.post('/api/switches/:id', (req,res)=>{
   }
 
   updateSwitch(targetSwitch, command).then((value)=>{
-    res.json(value)
+    emitSwitchChange(value);
   }).catch(err=>{console.error(err)})
+  res.send('updating switch')
 })
 
 app.get('*', (req, res)=>{
   res.sendFile('index')
 })
 
-app.listen(process.env.PORT, function () {
+http.listen(process.env.PORT, function () {
   console.log('Listening on port ' + process.env.PORT);
 })
