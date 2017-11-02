@@ -3,7 +3,10 @@ import openSocket from 'socket.io-client';
 import logo from './logo.svg';
 import './App.css';
 
-const socket = openSocket('http://localhost:3000');
+let location = window
+  ? window.location.href
+  : "http://localhost:3000";
+const socket = openSocket(location);
 
 class App extends Component {
   state = {

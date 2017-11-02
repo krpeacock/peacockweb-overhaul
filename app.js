@@ -55,7 +55,7 @@ function updateSwitch(targetSwitch, state){
                 })
               }
               else if (value.group === "strip" && process.env.ENV ==="production"){
-                fetch(`http://10.0.1.4/api/switches/${value.switch_num}?password=${process.env.PASSWORD}&command=${value.state}`, {
+                fetch(`http://10.0.1.5/api/switches/${value.switch_num}?password=${process.env.PASSWORD}&command=${value.state}`, {
                   method: "POST"
                 })
                 .then(res=>{
