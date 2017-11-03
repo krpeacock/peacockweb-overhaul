@@ -1,11 +1,16 @@
 require('dotenv').config()
 
 const express = require('express');
-const app = express();
 const MongoClient = require('mongodb').MongoClient;
-const http = require('http').Server(app);
-const io = require('socket.io')(http);
+const {createServer} = require('http');
 const fetch = require('node-fetch');
+const next = require('next');
+const {parse} = require('url');
+const path = require('path');
+
+const dev = process.env.NODE_ENV !== 'production'
+const handler = next({dev});
+const handle = handler.getRequestHandler();
 
 var uri = process.env.DB_URI
 
@@ -87,38 +92,50 @@ function updateSwitch(targetSwitch, state){
 function emitSwitchChange(switchState){
   io.emit('switch update', switchState)
 }
+handler
+  .prepare()
+  .then(() => {
+    const app = express();
+    const http = require('http').Server(app);
+    const io = require('socket.io')(http);
 
+    app.use(express.static(__dirname + '/.next'));
+    // app.use(express.static(__dirname + '/public'));
+    
+    app.get('/api/switches', (req, res)=>{
+      if (switchData){
+        res.json(switchData);
+      }
+      else res.send('failure')
+    })
 
-app.use(express.static(__dirname + '/power_strip/build'));
+    app.post('/api/switches/:id', (req,res)=>{
+      var id = req.params.id;
+      var command = req.params.command;
 
-app.get('/api/switches', (req, res)=>{
-  if (switchData){
-    res.json(switchData);
-  }
-  else res.send('failure')
-})
+      let targetSwitch = switchData.filter(value=>{
+        return value.switch_num === id;
+      })[0]
+      if (!command) {
+        command = targetSwitch.state === "on" ? "off" : "on"
+      }
 
-app.post('/api/switches/:id', (req,res)=>{
-  var id = req.params.id;
-  var command = req.params.command;
+      updateSwitch(targetSwitch, command).then((value)=>{
+        emitSwitchChange(value);
+      }).catch(err=>{console.error(err)})
+      res.send('updating switch')
+    })
 
-  let targetSwitch = switchData.filter(value=>{
-    return value.switch_num === id;
-  })[0]
-  if (!command) {
-    command = targetSwitch.state === "on" ? "off" : "on"
-  }
+    // app.get('/strip', (req, res)=>{
+    //   res.sendFile('/stat/index')
+    // })
 
-  updateSwitch(targetSwitch, command).then((value)=>{
-    emitSwitchChange(value);
-  }).catch(err=>{console.error(err)})
-  res.send('updating switch')
-})
+    // app.get("*", (req, res)=>{
+    //   return handle(req, res);
+    // })
 
-app.get('*', (req, res)=>{
-  res.sendFile('index')
-})
+    http.listen(process.env.PORT, function () {
+      console.log('Listening on port ' + process.env.PORT);
+    })
+  })
 
-http.listen(process.env.PORT, function () {
-  console.log('Listening on port ' + process.env.PORT);
-})
