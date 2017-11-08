@@ -24,7 +24,8 @@ class App extends Component {
       this.setState({offline: true});
     })
     // Subscribe to switch change socket
-    socket.on('switch update', switchData => {
+    socket.on('switch update', json => {
+      let switchData = JSON.parse(json)
       let switchMap = this.state.switches.map((val)=>{
         if (val._id === switchData._id) return switchData;
         else return val;
