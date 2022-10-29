@@ -17,7 +17,7 @@
     "http-proxy": "^1.18.0",
     "mongodb": "^2.2.33",
     "node-fetch": "^1.7.3",
-    "socket.io": "^2.0.4"
+    "socket.io": "^2.5.0"
   },
   "devDependencies": {
     "locus": "^2.0.1"
